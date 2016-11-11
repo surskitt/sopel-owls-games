@@ -58,6 +58,7 @@ def handle_game(bot, trigger):
         else:
             bot.say(' ' * 7 + '>--->X_X')
             bot.say('Game over!')
+            bot.say('The word was {}'.format(word))
             bot.memory['hangman']['active'] = False
     else:
         bot.say(bot.memory['hangman']['curr'])
