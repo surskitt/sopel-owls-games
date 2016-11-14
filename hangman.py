@@ -41,9 +41,8 @@ def handle_game(bot, trigger):
 
     word, curr = bot.memory['hangman']['word'], bot.memory['hangman']['curr']
 
-    g = trigger.args[1]
-    curr = ''.join(g if g == i else j for i, j in zip(word, curr))
-    bot.memory['hangman']['curr'] = curr
+    guess = trigger.args[1]
+    curr = ''.join(guess if guess == i else j for i, j in zip(word, curr))
 
     if '_' not in curr:
         bot.say('You win!')
@@ -51,7 +50,7 @@ def handle_game(bot, trigger):
         bot.memory['hangman']['active'] = False
         return
 
-    if g not in word:
+    if guess not in word:
         bot.memory['hangman']['wrong'] += 1
         if bot.memory['hangman']['wrong'] < 7:
             bot.say(draw_man(bot.memory['hangman']['wrong']))
@@ -61,4 +60,6 @@ def handle_game(bot, trigger):
             bot.say('The word was {}'.format(word))
             bot.memory['hangman']['active'] = False
     else:
-        bot.say(bot.memory['hangman']['curr'])
+        bot.say(curr)
+
+    bot.memory['hangman']['curr'] = curr
