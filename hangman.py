@@ -18,7 +18,7 @@ def start_game(bot, trigger):
     bot.memory['hangman']['active'] = True
 
     basepath = os.path.dirname(__file__)
-    words_file = os.path.abspath(os.path.join(basepath, 'hangman_words.txt'))
+    words_file = os.path.abspath(os.path.join(basepath, 'words.txt'))
     with open(words_file) as f:
         bot.memory['hangman']['word'] = choice(f.readlines()).strip()
 
