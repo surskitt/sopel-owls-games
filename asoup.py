@@ -38,7 +38,7 @@ def start_game(bot, trigger):
     bot.say('Acro: {}'.format(asoup['acro']))
     bot.say('Send your acros!')
     bot.say('(e.g. /msg {} .asoup poo bum tits)'.format(bot.nick))
-    sleep(20)
+    sleep(60)
 
     asoup['round'] = 2
     if not asoup['submissions']:
@@ -50,7 +50,7 @@ def start_game(bot, trigger):
     asoup['submissions'] = list(asoup['submissions'].items())
     for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, i[1]))
-    sleep(10)
+    sleep(60)
 
     bot.say('Voting period over!')
     if not asoup['votes']:
