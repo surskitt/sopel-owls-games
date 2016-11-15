@@ -35,7 +35,7 @@ def start_game(bot, trigger):
         asoup['active'] = False
         return
     bot.say('Submission period over! Choose your winner!')
-    for n, i in enumerate(asoup['submissions']):
+    for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, i))
     asoup['scores'] = {}
     sleep(10)
