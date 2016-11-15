@@ -55,6 +55,7 @@ def start_game(bot, trigger):
     bot.say('Voting period over!')
     if not asoup['votes']:
         bot.say('No one voted...great.')
+        asoup['active'] = False
         return
     c = Counter(int(i) - 1 for i in asoup['votes'].values())
     winners = [asoup['submissions'][i[0]] for i in c.items()
