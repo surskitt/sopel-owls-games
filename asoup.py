@@ -20,10 +20,11 @@ def start_game(bot, trigger):
 
     asoup['active'] = True
     asoup['chan'] = trigger.sender
+    asoup['scores'] = {}
+    asoup['submissions'] = []
     bot.say('asoup started')
 
     asoup['round'] = 1
-    asoup['submissions'] = []
     asoup['acro'] = ''.join(sample(abc, choice((3, 4, 5))))
     bot.say('Alphabet soup started!')
     bot.say('Acro: {}'.format(asoup['acro']))
@@ -40,7 +41,6 @@ def start_game(bot, trigger):
     bot.say('e.g. /msg {} .asoupmit 1'.format(bot.nick))
     for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, i))
-    asoup['scores'] = {}
     sleep(10)
 
     winners = [asoup['submissions'][int(i) - 1]
@@ -77,4 +77,5 @@ def asoupmit(bot, trigger):
     else:
         if not msg.isdigit() and int(msg) > len(asoup['submissions']):
             bot.say('Vote by sending the number of the submission')
+            return
         asoup['scores'][msg] = asoup['scores'].get(msg, 0) + 1
