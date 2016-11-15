@@ -24,7 +24,6 @@ def start_game(bot, trigger):
     asoup['scores'] = {}
     asoup['submissions'] = {}
     asoup['votes'] = {}
-    bot.say('asoup started')
 
     asoup['round'] = 1
     asoup['acro'] = ''.join(sample(abc, choice((3, 4, 5))))
@@ -41,24 +40,23 @@ def start_game(bot, trigger):
         return
     bot.say('Submission period over! Choose your winner!')
     bot.say('e.g. /msg {} .asoupmit 1'.format(bot.nick))
-    asoup['submissions'] = [{i: asoup['submissions'][i]}
-                            for i in asoup['submissions']]
-    for n, i in enumerate(asoup['submissions'], start=1):
-        bot.say('{}: {}'.format(n, list(i.values())[0]))
+    asoup['submissions'] = list(enumerate(asoup['submissions'].items()))
+    for n, i in asoup['submissions']:
+        bot.say('{}: {}'.format(n+1, i[1]))
     sleep(10)
 
     bot.say('Voting period over!')
     if not asoup['votes']:
         bot.say('No one voted...great.')
     c = Counter(asoup['votes'].values())
-    winners = [asoup['submissions'][int(i[0])-1] for i in c.items()
+    winners = [asoup['submissions'][int(i[0])][1] for i in c.items()
                if i[1] == max(c.values())]
     if len(winners) == 1:
         bot.say('The winner is:')
     else:
         bot.say('The winners are:')
     for i in winners:
-        bot.say('{1} ({0})'.format(*list(i.items())[0]))
+        bot.say('{1} ({0})'.format(*i))
 
     asoup['active'] = False
 
@@ -83,4 +81,4 @@ def asoupmit(bot, trigger):
         if not msg.isdigit() and int(msg) > len(asoup['submissions']):
             bot.say('Vote by sending the number of the submission')
             return
-        asoup['votes'][trigger.nick] = msg
+        asoup['votes'][trigger.nick] = int(msg) - 1
