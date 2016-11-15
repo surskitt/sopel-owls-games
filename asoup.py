@@ -21,11 +21,11 @@ def handler(bot, trigger):
 
 
 def start_game(bot, trigger):
-    if bot.memory['asoup']['active']:
+    asoup = bot.memory['asoup']
+
+    if asoup['active']:
         bot.say('Game is already running')
         return
-
-    asoup = bot.memory['asoup']
 
     asoup['active'] = True
     asoup['chan'] = trigger.sender
