@@ -77,9 +77,11 @@ def asoupmit(bot, trigger):
         if ''.join(i[0] for i in msg.split()).upper() != asoup['acro']:
             bot.say('This doesn\'t match the acro')
             return
+        bot.say('acro accepted!')
         asoup['submissions'][trigger.nick] = msg
     else:
         if not msg.isdigit() and int(msg) > len(asoup['submissions']):
             bot.say('Vote by sending the number of the submission')
             return
+        bot.say('Vote accepted')
         asoup['votes'][trigger.nick] = int(msg) - 1
