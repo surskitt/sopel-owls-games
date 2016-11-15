@@ -41,12 +41,15 @@ def start_game(bot, trigger):
         return
     bot.say('Submission period over! Choose your winner!')
     bot.say('e.g. /msg {} .asoupmit 1'.format(bot.nick))
-    asoup['submissions'] = [{i: asoup['submissions'][i]} for i in asoup['submissions']]
+    asoup['submissions'] = [{i: asoup['submissions'][i]}
+                            for i in asoup['submissions']]
     for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, list(i.values())[0]))
     sleep(10)
 
     bot.say('Voting period over!')
+    if not asoup['votes']:
+        bot.say('No one voted...great.')
     c = Counter(asoup['votes'].values())
     winners = [asoup['submissions'][int(i[0])-1] for i in c.items()
                if i[1] == max(c.values())]
