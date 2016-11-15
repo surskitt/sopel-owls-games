@@ -89,7 +89,7 @@ def asoupmit(bot, trigger):
         if not msg.isdigit() and int(msg) > len(asoup['submissions']):
             bot.say('Vote by sending the number of the submission')
             return
-        if asoup['submissions'][int(msg) - 1][1] == trigger.nick:
+        if asoup['submissions'][int(msg) - 1][0] == trigger.nick:
             bot.say('You can\'t vote for your own acro!')
             return
         bot.say('Vote accepted')
