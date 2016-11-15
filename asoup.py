@@ -27,6 +27,8 @@ def start_game(bot, trigger):
     asoup['acro'] = ''.join(sample(abc, choice((3, 4, 5))))
     bot.say('Alphabet soup started!')
     bot.say('Acro: {}'.format(asoup['acro']))
+    bot.say('Send your acros!')
+    bot.say('(e.g. /msg {} .asoupmit poo bum tits)'.format(bot.nick))
     sleep(30)
 
     asoup['round'] = 2
@@ -35,6 +37,7 @@ def start_game(bot, trigger):
         asoup['active'] = False
         return
     bot.say('Submission period over! Choose your winner!')
+    bot.say('e.g. /msg {} .asoupmit 1'.format(bot.nick))
     for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, i))
     asoup['scores'] = {}
