@@ -13,6 +13,13 @@ def setup(bot):
 
 
 @commands('asoup')
+def handler(bot, trigger):
+    if trigger.is_privmsg:
+        asoupmit(bot, trigger)
+    else:
+        start_game(bot, trigger)
+
+
 def start_game(bot, trigger):
     if bot.memory['asoup']['active']:
         bot.say('Game is already running')
@@ -31,8 +38,8 @@ def start_game(bot, trigger):
     bot.say('Alphabet soup started!')
     bot.say('Acro: {}'.format(asoup['acro']))
     bot.say('Send your acros!')
-    bot.say('(e.g. /msg {} .asoupmit poo bum tits)'.format(bot.nick))
-    sleep(60)
+    bot.say('(e.g. /msg {} .asoup poo bum tits)'.format(bot.nick))
+    sleep(20)
 
     asoup['round'] = 2
     if not asoup['submissions']:
@@ -41,16 +48,19 @@ def start_game(bot, trigger):
         return
     bot.say('Submission period over! Choose your winner!')
     bot.say('e.g. /msg {} .asoupmit 1'.format(bot.nick))
-    asoup['submissions'] = list(enumerate(asoup['submissions'].items()))
-    for n, i in asoup['submissions']:
-        bot.say('{}: {}'.format(n+1, i[1]))
-    sleep(60)
+    asoup['submissions'] = list(asoup['submissions'].items())
+    for n, i in enumerate(asoup['submissions'], start=1):
+        bot.say('{}: {}'.format(n, i[1]))
+    sleep(10)
 
     bot.say('Voting period over!')
     if not asoup['votes']:
         bot.say('No one voted...great.')
-    c = Counter(asoup['votes'].values())
-    winners = [asoup['submissions'][int(i[0])][1] for i in c.items()
+    # c = Counter(asoup['votes'].values())
+    c = Counter(int(i) - 1 for i in asoup['votes'].values())
+    # winners = [asoup['submissions'][int(i[0])][1] for i in c.items()
+               # if i[1] == max(c.values())]
+    winners = [asoup['submissions'][i[0]] for i in c.items()
                if i[1] == max(c.values())]
     if len(winners) == 1:
         bot.say('The winner is:')
@@ -62,8 +72,8 @@ def start_game(bot, trigger):
     asoup['active'] = False
 
 
-@require_privmsg
-@commands('asoupmit')
+# @require_privmsg
+# @commands('asoupmit')
 def asoupmit(bot, trigger):
     asoup = bot.memory['asoup']
 
@@ -82,6 +92,9 @@ def asoupmit(bot, trigger):
     else:
         if not msg.isdigit() and int(msg) > len(asoup['submissions']):
             bot.say('Vote by sending the number of the submission')
+            return
+        if asoup['submissions'][int(msg) - 1][1] == trigger.nick:
+            bot.say('You can\'t vote for your own acro!')
             return
         bot.say('Vote accepted')
         asoup['votes'][trigger.nick] = int(msg) - 1
