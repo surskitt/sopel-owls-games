@@ -4,29 +4,49 @@
 # based on the game layout here: http://www.botosaurus.com/games/?q=node/6
 
 from sopel.module import commands
+from sopel.config.types import (StaticSection, ValidatedAttribute,
+                                ListAttribute)
 from time import sleep
 from string import ascii_uppercase
 from random import sample, choice
 from collections import Counter
 
 
+class SoupSection(StaticSection):
+    submission_timer = ValidatedAttribute('submission_timer', int, default=60)
+    vote_timer = ValidatedAttribute('vote_timer', int, default=60)
+    ignored_letters = ListAttribute('ignored_letters', default='XYZ')
+
+
 def setup(bot):
+    bot.config.define_section('asoup', SoupSection)
     # take all uppercase letters apart from those specified
-    abc = [i for i in ascii_uppercase if i not in 'XYZ']
+    abc = [i for i in ascii_uppercase
+           if i not in bot.config.asoup.ignored_letters]
     bot.memory['asoup'] = {'active': False, 'abc': abc}
+
+
+def configure(config):
+    config.define_section('asoup')
+    config.asoup.configure_setting('submission_timer',
+                                   'How long to wait for submissions?')
+    config.asoup.configure_setting('vote_timer',
+                                   'How long to wait for votes?')
+    config.asoup.configure_setting('ignored_letters',
+                                   'Which letters should not appear in acros?')
 
 
 # handler function to start game or submit depending on where command is run
 @commands('asoup')
 def handler(bot, trigger):
     if not trigger.is_privmsg:
-        start_game(bot, trigger)
+        handle_game(bot, trigger)
     else:
         asoupmit(bot, trigger)
 
 
 # function to start the game
-def start_game(bot, trigger):
+def handle_game(bot, trigger):
     asoup = bot.memory['asoup']
 
     # if game is already running then say so and quit
@@ -49,7 +69,8 @@ def start_game(bot, trigger):
     bot.say('Acro: {}'.format(asoup['acro']))
     bot.say('Send your acros!')
     bot.say('(e.g. /msg {} .asoup poo bum tits)'.format(bot.nick))
-    sleep(60)
+    # sleep for 60 seconds, or as long as configured
+    sleep(bot.config.asoup.submission_timer)
 
     # round 2 logic
     asoup['round'] = 2
@@ -64,7 +85,8 @@ def start_game(bot, trigger):
     asoup['submissions'] = list(asoup['submissions'].items())
     for n, i in enumerate(asoup['submissions'], start=1):
         bot.say('{}: {}'.format(n, i[1]))
-    sleep(60)
+    # sleep for 60 seconds, or as long as configured
+    sleep(bot.config.asoup.vote_timer)
 
     bot.say('Voting period over!')
     # if no one voted then end the game
