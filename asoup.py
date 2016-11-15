@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Alphabet soup game for the sopel irc bot
+# based on the game layout here: http://www.botosaurus.com/games/?q=node/6
+
 from sopel.module import commands
 from time import sleep
 from string import ascii_uppercase
