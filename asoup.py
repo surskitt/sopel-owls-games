@@ -95,7 +95,7 @@ def handle_game(bot, trigger):
         asoup['active'] = False
         return
     # counter class to tally the votes
-    c = Counter(int(i) - 1 for i in asoup['votes'].values())
+    c = Counter(int(i) for i in asoup['votes'].values())
     # take the winner(s) using the votes and submissions lists
     winners = [asoup['submissions'][i[0]] for i in c.items()
                if i[1] == max(c.values())]
