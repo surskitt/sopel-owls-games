@@ -57,10 +57,7 @@ def start_game(bot, trigger):
     if not asoup['votes']:
         bot.say('No one voted...great.')
         return
-    # c = Counter(asoup['votes'].values())
     c = Counter(int(i) - 1 for i in asoup['votes'].values())
-    # winners = [asoup['submissions'][int(i[0])][1] for i in c.items()
-               # if i[1] == max(c.values())]
     winners = [asoup['submissions'][i[0]] for i in c.items()
                if i[1] == max(c.values())]
     if len(winners) == 1:
@@ -73,8 +70,6 @@ def start_game(bot, trigger):
     asoup['active'] = False
 
 
-# @require_privmsg
-# @commands('asoupmit')
 def asoupmit(bot, trigger):
     asoup = bot.memory['asoup']
 
