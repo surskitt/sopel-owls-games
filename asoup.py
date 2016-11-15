@@ -2,13 +2,14 @@
 
 from sopel.module import commands, require_privmsg
 from time import sleep
-from string import ascii_uppercase as abc
+from string import ascii_uppercase
 from random import sample, choice
 from collections import Counter
 
 
 def setup(bot):
-    bot.memory['asoup'] = {'active': False}
+    abc = [i for i in ascii_uppercase if i not in 'XYZ']
+    bot.memory['asoup'] = {'active': False, 'abc': abc}
 
 
 @commands('asoup')
@@ -26,12 +27,12 @@ def start_game(bot, trigger):
     asoup['votes'] = {}
 
     asoup['round'] = 1
-    asoup['acro'] = ''.join(sample(abc, choice((3, 4, 5))))
+    asoup['acro'] = ''.join(sample(asoup['abc'], choice((3, 4, 5))))
     bot.say('Alphabet soup started!')
     bot.say('Acro: {}'.format(asoup['acro']))
     bot.say('Send your acros!')
     bot.say('(e.g. /msg {} .asoupmit poo bum tits)'.format(bot.nick))
-    sleep(20)
+    sleep(60)
 
     asoup['round'] = 2
     if not asoup['submissions']:
@@ -43,7 +44,7 @@ def start_game(bot, trigger):
     asoup['submissions'] = list(enumerate(asoup['submissions'].items()))
     for n, i in asoup['submissions']:
         bot.say('{}: {}'.format(n+1, i[1]))
-    sleep(10)
+    sleep(60)
 
     bot.say('Voting period over!')
     if not asoup['votes']:
