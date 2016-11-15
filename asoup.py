@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sopel.module import commands, require_privmsg
+from sopel.module import commands
 from time import sleep
 from string import ascii_uppercase
 from random import sample, choice
