@@ -29,7 +29,6 @@ def start_game(bot, trigger):
 
     asoup['active'] = True
     asoup['chan'] = trigger.sender
-    asoup['scores'] = {}
     asoup['submissions'] = {}
     asoup['votes'] = {}
 
