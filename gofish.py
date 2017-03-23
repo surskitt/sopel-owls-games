@@ -2,14 +2,14 @@
 
 from sopel.module import commands
 import random
-from collections import Counter
+# from collections import Counter
 from itertools import cycle
 
 
 class Player():
     def __init__(self, name):
         self.name = name
-        self.hand = Counter()
+        self.hand = {}
         self.pairs = 0
 
     def fish(self, card):
