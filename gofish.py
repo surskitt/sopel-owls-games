@@ -45,12 +45,12 @@ def start(bot, trigger):
 
     players = [Player(i) for i in [trigger.nick] + trigger.group(2).split()]
 
-    if len(set(players)) < 2:
-        bot.say('Not enough players!')
-        return
-
     if not all([i in bot.users for i in [j.name for j in players]]):
         bot.say('Not all users are online')
+        return
+
+    if len(set(players)) < 2:
+        bot.say('Not enough players!')
         return
 
     bot.memory['gofish']['deck'] = random.sample('A23456789XJQK'*4, 52)
