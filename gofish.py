@@ -64,13 +64,29 @@ def start(bot, trigger):
     bot.say('Game started with {}'.format(', '.join(i.name for i in players)))
     bot.memory['gofish']['active'] = True
 
+    random.shuffle(players)
     bot.memory['gofish']['players'] = cycle(players)
     bot.memory['gofish']['current'] = next(bot.memory['gofish']['players'])
     gofishscores(bot, trigger)
 
+    bot.say('{}\'s go!'.format(bot.memory['gofish']['current'].name))
+    bot.say('To play: .gofish <player> <card>')
+
 
 def fish(bot, trigger):
-    pass
+    if not trigger.group(2) or len(trigger.group(2).split()) < 2:
+        bot.say('To play: .gofish <player> <card>')
+        return
+
+    player, card = trigger.group(2).split()
+
+    if player not in bot.users:
+        bot.say('{} isn\'t in the game! Pick again'.format(player))
+        return
+
+    if card not in 'A23456789XJQK':
+        bot.say('{} isn\'t a card! Pick again from A23456789JQK'.format(card))
+        return
 
 
 @commands('gfcards')
