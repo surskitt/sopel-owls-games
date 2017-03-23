@@ -9,14 +9,15 @@ from itertools import cycle
 class Player():
     def __init__(self, name):
         self.name = name
-        self.hand = {}
+        self.hand = []
         self.pairs = 0
 
     def fish(self, card):
-        self.hand[card] += 1
-        if self.hand[card] == 2:
+        if card not in self.hand:
+            self.hand.append(card)
+        else:
             self.pairs += 1
-            del self.hand[card]
+            self.hand.remove(card)
 
     def get_hand(self):
         return sorted(self.hand)
