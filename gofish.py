@@ -43,14 +43,15 @@ def start(bot, trigger):
         bot.say('.gofish <user1> {<user2> ...}')
         return
 
-    players = [Player(i) for i in [trigger.nick] + trigger.group(2).split()]
+    players = [Player(i) for i in
+               set([str(trigger.nick)] + trigger.group(2).split())]
 
     if not all([i in bot.users for i in [j.name for j in players]]):
         bot.say('Not all users are online')
         return
 
     if len(set(players)) < 2:
-        bot.say('Not enough players!')
+        bot.say('You can\'t play against yourself!')
         return
 
     bot.memory['gofish']['deck'] = random.sample('A23456789XJQK'*4, 52)
@@ -69,8 +70,9 @@ def start(bot, trigger):
     bot.memory['gofish']['active'] = True
 
     random.shuffle(players)
-    bot.memory['gofish']['players'] = cycle(players)
-    bot.memory['gofish']['current'] = next(bot.memory['gofish']['players'])
+    bot.memory['gofish']['players'] = players
+    bot.memory['gofish']['tracker'] = cycle(players)
+    bot.memory['gofish']['current'] = next(bot.memory['gofish']['tracker'])
     gofishscores(bot, trigger)
 
     bot.say('{}\'s go!'.format(bot.memory['gofish']['current'].name))
@@ -108,10 +110,5 @@ def gofishscores(bot, trigger):
     players = bot.memory['gofish']['players']
 
     bot.say('Current scores:')
-    scores = {}
-    player = next(players)
-    while player.name not in scores:
-        scores[player.name] = player.pairs
-        player = next(players)
-    for i in sorted(scores):
-        bot.say('{}: {}'.format(i, scores[i]))
+    for player in players:
+        bot.say('{}: {}'.format(player.name, player.pairs))
