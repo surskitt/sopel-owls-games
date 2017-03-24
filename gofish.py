@@ -2,7 +2,6 @@
 
 from sopel.module import commands
 import random
-# from collections import Counter
 from itertools import cycle
 
 
@@ -21,6 +20,13 @@ class Player():
 
     def get_hand(self):
         return sorted(self.hand)
+
+    def fished(self, card):
+        if card in self.hand:
+            self.hand.remove(card)
+            return card
+        else:
+            return 0
 
 
 def setup(bot):
@@ -43,10 +49,10 @@ def start(bot, trigger):
         bot.say('.gofish <user1> {<user2> ...}')
         return
 
-    players = [Player(i) for i in
-               set([str(trigger.nick)] + trigger.group(2).split())]
+    players = {i: Player(i) for i in
+               set([str(trigger.nick)] + trigger.group(2).split())}
 
-    if not all([i in bot.users for i in [j.name for j in players]]):
+    if not all([i in bot.users for i in players]):
         bot.say('Not all users are online')
         return
 
@@ -56,24 +62,21 @@ def start(bot, trigger):
 
     bot.memory['gofish']['deck'] = random.sample('A23456789XJQK'*4, 52)
 
-    if len(players) == 2:
-        initcards = 7
-    else:
-        initcards = 5
-
     # deal cards
-    for player in players:
-        for i in range(initcards):
+    for player in players.values():
+        for i in range(7 if len(players) == 2 else 5):
             player.fish(bot.memory['gofish']['deck'].pop())
 
-    bot.say('Game started with {}'.format(', '.join(i.name for i in players)))
+    bot.say('Game started with {}'.format(', '.join(players)))
     bot.memory['gofish']['active'] = True
 
-    random.shuffle(players)
     bot.memory['gofish']['players'] = players
-    bot.memory['gofish']['tracker'] = cycle(players)
+    bot.memory['gofish']['tracker'] = cycle(shuffle(players.values()))
     bot.memory['gofish']['current'] = next(bot.memory['gofish']['tracker'])
     gofishscores(bot, trigger)
+
+    for player in players:
+        gofishcards(bot, player)
 
     bot.say('{}\'s go!'.format(bot.memory['gofish']['current'].name))
     bot.say('To play: .gofish <player> <card>')
@@ -96,13 +99,18 @@ def fish(bot, trigger):
 
 
 @commands('gfcards')
-def gofishcards(bot, trigger):
-    pass
+def gofishcards(bot, trigger=None):
+    players = bot.memory['gofish']['players']
+    player = getattr(trigger, 'nick', trigger)
+    cards = sorted(players[player].hand)
+
+    bot.say('Your cards: {}'.format(', '.join(cards)), player)
 
 
 @commands('gfend')
 def gofishend(bot, trigger):
-    pass
+    bot.say('Game over!')
+    bot.memory['gofish']['active'] = False
 
 
 @commands('gfscores')
@@ -110,5 +118,9 @@ def gofishscores(bot, trigger):
     players = bot.memory['gofish']['players']
 
     bot.say('Current scores:')
-    for player in players:
-        bot.say('{}: {}'.format(player.name, player.pairs))
+    for player in sorted(players):
+        bot.say('{}: {}'.format(player, players[player].pairs))
+
+
+def shuffle(l):
+    return random.sample(list(l), len(l))
