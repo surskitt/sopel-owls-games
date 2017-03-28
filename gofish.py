@@ -33,7 +33,7 @@ class Player():
 
 class Deck():
     def __init__(self):
-        self.cards = shuffle('A23456789XJQK'*4)
+        self.cards = shuffle('A23456789XJQK'*2)
 
     def fish(self):
         if self.cards:
@@ -41,9 +41,8 @@ class Deck():
         else:
             return 0
 
-    def isEmpty(self):
-        if not self.cards:
-            return True
+    def get_size(self):
+        return len(self.cards)
 
 
 def setup(bot):
@@ -100,10 +99,9 @@ def start(bot, trigger):
 
 
 def fish(bot, trigger):
-    fisher = bot.memory['gofish']['current']
-    players = bot.memory['gofish']['players']
+    mem = bot.memory['gofish']
 
-    if trigger.nick != fisher.name:
+    if trigger.nick != mem['current'].name:
         return
 
     if not trigger.group(2) or len(trigger.group(2).split()) < 2:
@@ -113,7 +111,7 @@ def fish(bot, trigger):
     player, card = trigger.group(2).split()
     card = card.upper()
 
-    if player not in players:
+    if player not in mem['players']:
         bot.say('{} isn\'t in the game! Pick again'.format(player))
         return
 
@@ -125,30 +123,39 @@ def fish(bot, trigger):
         bot.say('Can\'t fish from yourself!')
         return
 
-    fished = players[player].fished(card)
+    fished = mem['players'][player].fished(card)
 
     if fished:
-        fisher.fish(card)
+        mem['current'].fish(card)
         checkwin(bot, trigger)
-        if not bot.memory['gofish']['active']:
+        if not mem['active']:
             return
-        bot.say('{} had {}! Go again!'.format(player, card))
-        if len(players[player].hand) == 0:
-            for i in range(5):
-                players[player].fish(bot.memory['gofish']['fish'].fish())
+        if mem['deck'].get_size() or mem['current'].get_hand():
+            bot.say('{} had {}! Go again!'.format(player, card))
+            bot.say('{} cards left in deck'.format(mem['deck'].get_size()))
+            if not mem['players'][player].get_hand():
+                bot.say('Out of cards, drawing 5 more')
+                for i in range(5):
+                    mem['current'].fish(mem['deck'].fish())
+        else:
+            bot.say('No cards left and none in the deck')
+            mem['current'] = next(mem['tracker'])
     else:
         bot.say('{} didn\'t have {}! Go fish!'.format(player, card))
-        fisher.fish(bot.memory['gofish']['deck'].fish())
-        bot.memory['gofish']['current'] = next(bot.memory['gofish']['tracker'])
-        bot.say('{}\'s turn!'.format(bot.memory['gofish']['current'].name))
-    gofishcards(bot, fisher.name)
+        mem['current'].fish(mem['deck'].fish())
+        bot.say('{} cards left in deck'.format(mem['deck'].get_size()))
+        mem['current'] = next(mem['tracker'])
+    while not mem['current'].get_hand():
+        mem['current'] = next(mem['tracker'])
+    bot.say('{}\'s turn!'.format(mem['current'].name))
+    gofishcards(bot, mem['current'].name)
 
 
 @commands('gfcards')
 def gofishcards(bot, trigger=None):
     players = bot.memory['gofish']['players']
     player = getattr(trigger, 'nick', trigger)
-    cards = sorted(players[player].hand)
+    cards = sorted(players[player].get_hand())
 
     bot.say('Your cards: {}'.format(', '.join(cards)), player)
 
@@ -169,8 +176,9 @@ def gofishscores(bot, trigger):
 
 
 def checkwin(bot, trigger):
-    players, deck = bot.memory['gofish']['players'], bot.memory['gofish']['deck']
-    if deck.isEmpty() and not any(len(i.hand() for i in players.values())):
+    mem = bot.memory['gofish']
+    players, deck = mem['players'], mem['deck']
+    if deck.get_size() and not any(i.get_hand() for i in players.values()):
         gofishend()
         gofishscores(bot, trigger)
         winner = max(players.values(), key=lambda x: x.pairs)
