@@ -3,6 +3,7 @@
 from sopel.module import commands, require_chanmsg
 from sopel.formatting import color, colors
 from random import choice
+import time
 
 def setup(bot):
     for channel in bot.config.core.channels:
@@ -14,6 +15,7 @@ class Board:
         self.board = [[0]*6 for i in range(7)]
         self.players = {1: player}
         self.active_player = 1
+        self.colours = {1: colors.RED, 2: colors.BLUE}
 
         self.bot, self.trigger = bot, trigger
 
@@ -31,7 +33,8 @@ class Board:
         self.players[2] = player
         self.bot.say('Game started between {} and {}'.format(*self.players.values()))
         self.print_board()
-        self.bot.say('{}\'s go!'.format(self.players[1]))
+        self.bot.say(color('{}\'s go!'.format(self.players[1]), self.colours[1]))
+        self.bot.say('(.connect4 COLUMN_NUMBER to play)')
 
     def col_full(self, col):
         return 0 not in self.board[col]
@@ -59,7 +62,6 @@ class Board:
 
 
     def print_board(self):
-        #  pieces = {0: '○', 1: '\x1b[34m●\x1b[0m', 2: '\x1b[31m●\x1b[0m'}
         pieces = {0: '○', 1: color('●', colors.RED), 2: color('●', colors.BLUE)}
 
         for i in [' '.join(pieces[j] for j in i) for i in self.rows()]:
@@ -71,6 +73,9 @@ class Board:
         check = [''.join(str(j) for j in i) for i in directions]
 
         return any(any(j in i for j in ['1111', '2222']) for i in check)
+
+    def check_boardfull(self):
+        return not any(0 in i for i in self.board)
 
     def take_turn(self, col, player):
         if col not in [str(i) for i in range(1, 8)] or not col.isdigit():
@@ -102,8 +107,17 @@ class Board:
             self.active = False
             return
 
+        if self.check_boardfull():
+            self.bot.say('Board full, game over!')
+            self.active = False
+            return
+
         self.active_player = [1,2][self.active_player == 1]
-        self.bot.say('{}\'s go!'.format(self.players[self.active_player]))
+
+        player_name = self.players[self.active_player]
+        player_colour = self.colours[self.active_player]
+
+        self.bot.say(color('{}\'s go!'.format(player_name), player_colour))
 
 @require_chanmsg
 @commands('connect4')
@@ -116,6 +130,11 @@ def handler(bot, trigger):
     else:
         board = Board(trigger.nick, bot, trigger)
         bot.memory[trigger.sender]['connect4'] = board
+
+        time.sleep(600)
+        if len(board.players) < 2:
+            bot.say('No one accepted the connect4 challenge, game cancelled.')
+            bot.memory[trigger.sender]['connect4'] = None
 
 def handle_players(bot, trigger):
     board = bot.memory[trigger.sender]['connect4']
