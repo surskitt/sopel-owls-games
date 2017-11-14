@@ -23,7 +23,7 @@ class Board:
 
     def add_player(self, player):
         if len(self.players) > 1:
-            self.bot.say('There are already two players')
+            self.bot.say('There is already an active game')
             return
 
         if self.players[1] == player:
